@@ -71,7 +71,7 @@ delete_subdomain_local() {
 # Function to create a DNS record in Cloudflare
 create_dns_record_cloudflare() {
     local subdomain="$1"
-    local record_type="CMANE"
+    local record_type="CNAME"
     local ip_address="54.226.6.57"  # Replace with your server's IP address
 
     # Send API request to create DNS record
@@ -87,16 +87,24 @@ delete_dns_record_cloudflare() {
     local subdomain="$1"
 
     # Send API request to fetch DNS record ID
-    local dns_record_id=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/dns_records?type=A&name=$subdomain.$DOMAIN" \
+    local dns_record_ids=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/dns_records?type=A&name=$subdomain.$DOMAIN" \
     -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
     -H "Content-Type: application/json" \
-    | jq -r '.result[0].id')
+    | jq -r '.result[].id')
 
-    # Send API request to delete DNS record
-    curl -s -X DELETE "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/dns_records/$dns_record_id" \
-    -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-    -H "Content-Type: application/json" \
-    | jq -r '.success'
+    if [ -z "$dns_record_ids" ]; then
+        echo "No DNS records found for $subdomain.$DOMAIN"
+        return 1
+    fi
+
+    # Loop through each DNS record ID and delete it
+    for dns_record_id in $dns_record_ids; do
+        # Send API request to delete DNS record
+        curl -s -X DELETE "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/dns_records/$dns_record_id" \
+        -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+        -H "Content-Type: application/json" \
+        | jq -r '.success'
+    done
 }
 
 # Function to create a new subdomain
@@ -130,7 +138,7 @@ delete_subdomain() {
     delete_subdomain_local "$subdomain"
 
     # Delete DNS record in Cloudflare
-    delete_dns_record_cloudflare "$subdomain" && echo "DNS record deleted on Cloudflare successfully."
+    delete_dns_record_cloudflare "$subdomain" && echo "DNS records deleted on Cloudflare successfully."
 }
 
 # Main menu function
@@ -139,15 +147,14 @@ main_menu() {
     echo "1. Create a subdomain"
     echo "2. Delete a subdomain"
     echo "3. Exit"
-	echo "r. restart"
 
     read -p "Please enter your choice: " choice
 
     case $choice in
         1) create_subdomain ;;
         2) delete_subdomain ;;
-        3)  exit ;;
-        r) sudo systemctl restart nginx ;;
+        3) sudo systemctl restart nginx
+           exit ;;
         *) echo "Invalid choice. Please enter a number between 1 and 3."
            main_menu ;;
     esac
