@@ -144,9 +144,8 @@ delete_subdomain() {
 # Main menu function
 main_menu() {
     echo "Main Menu:"
-    echo "1. Create a subdomain"
-    echo "2. Delete a subdomain"
-    echo "3. Exit"
+    echo "1. Create a subdomain			2. Delete a subdomain"
+    echo "3. Exit						r. exit"
 
     read -p "Please enter your choice: " choice
 
