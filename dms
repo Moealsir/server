@@ -1,41 +1,38 @@
 #!/bin/bash
 
-# Function to display menu and get user choice
-display_menu() {
-    echo "Choose an action:"
-    echo "1. Create subdomain"
-    echo "2. Delete subdomain"
+# Main menu function
+main_menu() {
+    echo "Main Menu:"
+    echo "1. Create a subdomain"
+    echo "2. Delete a subdomain"
     echo "3. Exit"
-    read -p "Enter your choice: " choice
+
+    read -p "Please enter your choice: " choice
+
+    case $choice in
+        1) create_subdomain ;;
+        2) delete_subdomain ;;
+        3) exit ;;
+        *) echo "Invalid choice. Please enter a number between 1 and 3."
+           main_menu ;;
+    esac
 }
 
-# Function to execute create subdomain script
+# Function to create a subdomain
 create_subdomain() {
-    read -p "Enter domain type (s for subdomain, m for main domain): " domain_type
-    read -p "Enter subdomain or domain: " subdomain_or_domain
-    read -p "Enter path name: " path_name
-    ./create_subdomain.sh "$domain_type" "$subdomain_or_domain" "$path_name"
+    echo "Creating a subdomain..."
+    read -p "Enter the subdomain name: " subdomain
+    bash csp "$subdomain"
 }
 
-# Function to execute delete subdomain script
+# Function to delete a subdomain
 delete_subdomain() {
-    read -p "Enter subdomain: " subdomain
-    ./delete_subdomain.sh "$subdomain"
+    echo "Deleting a subdomain..."
+    read -p "Enter the subdomain name: " subdomain
+    bash dsp "$subdomain"
 }
 
-# Main function
-main() {
-    while true; do
-        display_menu
-
-        case $choice in
-            1) create_subdomain ;;
-            2) delete_subdomain ;;
-            3) echo "Exiting..."; exit ;;
-            *) echo "Invalid choice. Please enter a number from the menu." ;;
-        esac
-    done
-}
-
-# Run main function
-main
+# Main execution
+while true; do
+    main_menu
+done

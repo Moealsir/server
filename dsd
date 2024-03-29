@@ -1,5 +1,14 @@
 #!/bin/bash
 
+##########################################################################
+#						  	                                    		 #
+# 	delete a sub domain                                                  #
+#							                                    		 #
+#	echo "Usage: $0 <subdomain>                                          #
+#								                                    	 #
+##########################################################################
+
+
 # Define variables
 DOMAIN="moealsir.tech"
 NGINX_SITES_AVAILABLE="/etc/nginx/sites-available"
