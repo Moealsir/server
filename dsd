@@ -10,14 +10,14 @@ NGINX_RELOAD="sudo systemctl reload nginx"
 # Function to delete Nginx configuration and document root for the subdomain
 delete_subdomain() {
     SUBDOMAIN="$1"
-    SUBDOMAIN_CONF="$NGINX_SITES_AVAILABLE/$SUBDOMAIN.conf"
+    SUBDOMAIN_CONF="$NGINX_SITES_AVAILABLE/$SUBDOMAIN.$DOMAIN"
     SUBDOMAIN_DIR="/var/www/$SUBDOMAIN.$DOMAIN"
 
     # Remove Nginx configuration file
     sudo rm -f "$SUBDOMAIN_CONF"
 
     # Remove symbolic link from sites-enabled
-    sudo rm -f "$NGINX_SITES_ENABLED/$SUBDOMAIN.conf"
+    sudo rm -f "$NGINX_SITES_ENABLED/$SUBDOMAIN.$DOMAIN"
 
     # Reload Nginx
     $NGINX_RELOAD
