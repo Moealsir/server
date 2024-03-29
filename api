@@ -139,14 +139,15 @@ main_menu() {
     echo "1. Create a subdomain"
     echo "2. Delete a subdomain"
     echo "3. Exit"
+	echo "r. restart"
 
     read -p "Please enter your choice: " choice
 
     case $choice in
         1) create_subdomain ;;
         2) delete_subdomain ;;
-        3) sudo systemctl restart nginx
-           exit ;;
+        3)  exit ;;
+        r) sudo systemctl restart nginx ;;
         *) echo "Invalid choice. Please enter a number between 1 and 3."
            main_menu ;;
     esac
