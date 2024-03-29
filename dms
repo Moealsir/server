@@ -22,14 +22,16 @@ main_menu() {
 create_subdomain() {
     echo "Creating a subdomain..."
     read -p "Enter the subdomain name: " subdomain
-    bash csp "$subdomain"
+    # Provide the correct path to the create subdomain script and call it with the subdomain argument
+    bash csd "$subdomain"
 }
 
 # Function to delete a subdomain
 delete_subdomain() {
     echo "Deleting a subdomain..."
     read -p "Enter the subdomain name: " subdomain
-    bash dsp "$subdomain"
+    # Provide the correct path to the delete subdomain script and call it with the subdomain argument
+    bash dsd "$subdomain"
 }
 
 # Main execution

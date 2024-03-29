@@ -4,7 +4,7 @@
 #						  	                                    		 #
 # 	delete a sub domain                                                  #
 #							                                    		 #
-#	echo "Usage: $0 <subdomain>                                          #
+#	echo "Usage: $0 <subdomain>"                                         #
 #								                                    	 #
 ##########################################################################
 
