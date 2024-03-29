@@ -7,8 +7,8 @@ NGINX_SITES_ENABLED="/etc/nginx/sites-enabled"
 NGINX_RELOAD="sudo systemctl reload nginx"
 
 # Cloudflare API credentials
-CLOUDFLARE_API_TOKEN="zZxAOGTf_CR_kj7YCzMmzL4Upxl4giZCJ6VnF2sQ"
-CLOUDFLARE_ZONE_ID="db2a6826a77fbf23e7c7519ac458cc06"
+CLOUDFLARE_API_TOKEN="y4YPReT2-KiliGfiRhG_sgXwR0BXFh-Zqp9VoPDk"
+CLOUDFLARE_ZONE_ID="zZxAOGTf_CR_kj7YCzMmzL4Upxl4giZCJ6VnF2sQ"
 
 # Function to create a new subdomain locally
 create_subdomain_local() {
@@ -71,14 +71,14 @@ delete_subdomain_local() {
 # Function to create a DNS record in Cloudflare
 create_dns_record_cloudflare() {
     local subdomain="$1"
-    local record_type="A"
+    local record_type="CNAME"
     local ip_address="54.226.6.57"  # Replace with your server's IP address
 
     # Send API request to create DNS record
     curl -s -X POST "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/dns_records" \
     -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
     -H "Content-Type: application/json" \
-    --data "{\"type\":\"$record_type\",\"name\":\"$subdomain.$DOMAIN\",\"content\":\"$ip_address\",\"ttl\":120,\"proxied\":true}" \
+    --data "{\"type\":\"$record_type\",\"name\":\"$subdomain.$DOMAIN\",\"content\":\"$ip_address\",\"ttl\":120,\"proxied\":false}" \
     | jq -r '.success'
 }
 
