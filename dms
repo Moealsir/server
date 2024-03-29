@@ -12,7 +12,7 @@ main_menu() {
     case $choice in
         1) create_subdomain ;;
         2) delete_subdomain ;;
-        3) ssr
+        3) sudo systemctl restart nginx
 		   exit ;;
         *) echo "Invalid choice. Please enter a number between 1 and 3."
            main_menu ;;
