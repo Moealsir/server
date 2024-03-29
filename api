@@ -71,14 +71,14 @@ delete_subdomain_local() {
 # Function to create a DNS record in Cloudflare
 create_dns_record_cloudflare() {
     local subdomain="$1"
-    local record_type="CNAME"
+    local record_type="CMANE"
     local ip_address="54.226.6.57"  # Replace with your server's IP address
 
     # Send API request to create DNS record
     curl -s -X POST "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/dns_records" \
     -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
     -H "Content-Type: application/json" \
-    --data "{\"type\":\"$record_type\",\"name\":\"$subdomain.$DOMAIN\",\"content\":\"$ip_address\",\"ttl\":120,\"proxied\":false}" \
+    --data "{\"type\":\"$record_type\",\"name\":\"$subdomain.$DOMAIN\",\"content\":\"$ip_address\",\"ttl\":120,\"proxied\":true}" \
     | jq -r '.success'
 }
 
@@ -136,8 +136,9 @@ delete_subdomain() {
 # Main menu function
 main_menu() {
     echo "Main Menu:"
-    echo "1. Create a subdomain			2. Delete a subdomain"
-    echo "3. Exit						r. exit"
+    echo "1. Create a subdomain"
+    echo "2. Delete a subdomain"
+    echo "3. Exit"
 
     read -p "Please enter your choice: " choice
 
