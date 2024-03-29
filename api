@@ -8,7 +8,7 @@ NGINX_RELOAD="sudo systemctl reload nginx"
 
 # Cloudflare API credentials
 CLOUDFLARE_API_TOKEN="y4YPReT2-KiliGfiRhG_sgXwR0BXFh-Zqp9VoPDk"
-CLOUDFLARE_ZONE_ID="zZxAOGTf_CR_kj7YCzMmzL4Upxl4giZCJ6VnF2sQ"
+CLOUDFLARE_ZONE_ID="db2a6826a77fbf23e7c7519ac458cc06"
 
 # Function to create a new subdomain locally
 create_subdomain_local() {
