@@ -33,8 +33,36 @@ create_subdomain_path() {
     # Create a test index.html file
     sudo sh -c "echo '<html><head><title>Welcome to $subdomain.moealsir.tech</title></head><body><h1>Success! The path $path_name has been created for $subdomain.moealsir.tech</h1></body></html>' > '/var/www/$subdomain.moealsir.tech/$path_name/index.html'"
 
-    # Inform user about completion
-    echo "Path created successfully for the subdomain $subdomain.moealsir.tech."
+    # Check if the Nginx configuration already exists
+    if [ ! -f "/etc/nginx/sites-available/$subdomain.moealsir.tech" ]; then
+        # Create Nginx configuration for the subdomain
+        sudo sh -c "cat > /etc/nginx/sites-available/$subdomain.moealsir.tech <<EOF
+server {
+    listen 80;
+    listen [::]:80;
+
+    server_name $subdomain.moealsir.tech;
+
+    root /var/www/$subdomain.moealsir.tech/$path_name;
+    index index.html index.htm index.nginx-debian.html;
+
+    location / {
+        try_files \$uri \$uri/ =404;
+    }
+}
+EOF"
+        # Enable the site by creating a symbolic link
+        sudo ln -s /etc/nginx/sites-available/$subdomain.moealsir.tech /etc/nginx/sites-enabled/
+
+        # Restart Nginx
+        sudo systemctl restart nginx
+
+        # Inform user about completion
+        echo "Nginx configuration created successfully for the subdomain $subdomain.moealsir.tech."
+    else
+        # Inform user that configuration already exists
+        echo "Nginx configuration for the subdomain $subdomain.moealsir.tech already exists."
+    fi
 }
 
 # Main script
