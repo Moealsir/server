@@ -1,0 +1,67 @@
+#!/bin/bash
+
+##########################################################################
+#																		 #
+# 	create path for domain or sub domain                                 #
+#																		 #
+#	echo "Usage: $0 <domain_type> <subdomain_or_domain> <path_name>"     #
+#																		 #
+#   echo "Example for subdomain: $0 s qrcodes qrcode1"                   #
+#																		 #
+#	echo "Example for main domain: $0 m d qrcode1"						 #
+#																		 #
+##########################################################################
+
+
+# Define variables
+DOMAIN="moealsir.tech"
+NGINX_SITES_AVAILABLE="/etc/nginx/sites-available"
+NGINX_SITES_ENABLED="/etc/nginx/sites-enabled"
+NGINX_RELOAD="sudo systemctl reload nginx"
+
+# Function to create Nginx configuration file for the path
+create_nginx_path_config() {
+    DOMAIN_TYPE="$1"
+    SUBDOMAIN="$2"
+    PATH_NAME="$3"
+
+    if [ "$DOMAIN_TYPE" == "s" ]; then
+        CONF_FILE="$NGINX_SITES_AVAILABLE/$SUBDOMAIN.$DOMAIN"
+        LOCATION="/var/www/$SUBDOMAIN.$DOMAIN/$PATH_NAME"
+    elif [ "$DOMAIN_TYPE" == "m" ]; then
+        CONF_FILE="$NGINX_SITES_AVAILABLE/default"
+        LOCATION="/var/www/$DOMAIN/$PATH_NAME"
+    else
+        echo "Invalid domain type: $DOMAIN_TYPE. Valid types are 's' (subdomain) or 'm' (main)."
+        exit 1
+    fi
+
+    # Add location block to Nginx configuration file
+    sudo sed -i "/server_name $SUBDOMAIN.$DOMAIN;/a \ \ \ \ location /$PATH_NAME {\n\ \ \ \ \ \ \ \ alias $LOCATION;\n\ \ \ \ }" $CONF_FILE
+
+    # Reload Nginx
+    $NGINX_RELOAD
+
+    echo "Path $PATH_NAME for $SUBDOMAIN.$DOMAIN created successfully."
+}
+
+# Main function
+main() {
+    if [ "$#" -ne 3 ]; then
+        echo "Usage: $0 <domain_type> <subdomain_or_domain> <path_name>"
+        echo "Example for subdomain: $0 s qrcodes qrcode1"
+        echo "Example for main domain: $0 m d qrcode1"
+        exit 1
+    fi
+
+    DOMAIN_TYPE="$1"
+    SUBDOMAIN_OR_DOMAIN="$2"
+    PATH_NAME="$3"
+
+    # Create Nginx configuration for the path
+    create_nginx_path_config $DOMAIN_TYPE $SUBDOMAIN_OR_DOMAIN $PATH_NAME
+}
+
+# Run main function with provided arguments
+main "$@"
+
