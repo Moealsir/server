@@ -12,7 +12,7 @@ create_main_domain_path() {
     sudo chmod -R 755 "/var/www/moealsir.tech/$path_name"
 
     # Create a test index.html file
-    sudo sh -c "echo '<html><head><title>Welcome to moealsir.tech</title></head><body><h1>Success! The path $path_name has been created for moealsir.tech</h1></body></html>' > /var/www/moealsir.tech$path_name/index.html"
+    sudo sh -c "echo '<html><head><title>Welcome to moealsir.tech</title></head><body><h1>Success! The path $path_name has been created for moealsir.tech</h1></body></html>' > '/var/www/moealsir.tech/$path_name/index.html'"
 
     # Inform user about completion
     echo "Path created successfully for the main domain."
@@ -31,7 +31,7 @@ create_subdomain_path() {
     sudo chmod -R 755 "/var/www/$subdomain.moealsir.tech/$path_name"
 
     # Create a test index.html file
-    sudo sh -c "echo '<html><head><title>Welcome to $subdomain.moealsir.tech</title></head><body><h1>Success! The path $path_name has been created for $subdomain.moealsir.tech</h1></body></html>' > /var/www/$subdomain.moealsir.tech$path_name/index.html"
+    sudo sh -c "echo '<html><head><title>Welcome to $subdomain.moealsir.tech</title></head><body><h1>Success! The path $path_name has been created for $subdomain.moealsir.tech</h1></body></html>' > '/var/www/$subdomain.moealsir.tech/$path_name/index.html'"
 
     # Inform user about completion
     echo "Path created successfully for the subdomain $subdomain.moealsir.tech."
