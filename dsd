@@ -4,7 +4,6 @@
 DOMAIN="moealsir.tech"
 NGINX_SITES_AVAILABLE="/etc/nginx/sites-available"
 NGINX_SITES_ENABLED="/etc/nginx/sites-enabled"
-NGINX_CONF="/etc/nginx/nginx.conf"
 NGINX_RELOAD="sudo systemctl reload nginx"
 
 # Function to delete Nginx configuration and document root for the subdomain
