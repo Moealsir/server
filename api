@@ -7,7 +7,7 @@ NGINX_SITES_ENABLED="/etc/nginx/sites-enabled"
 NGINX_RELOAD="sudo systemctl reload nginx"
 
 # Cloudflare API credentials
-CLOUDFLARE_API_TOKEN="y4YPReT2-KiliGfiRhG_sgXwR0BXFh-Zqp9VoPDk"
+CLOUDFLARE_API_TOKEN="zZxAOGTf_CR_kj7YCzMmzL4Upxl4giZCJ6VnF2sQ"
 CLOUDFLARE_ZONE_ID="db2a6826a77fbf23e7c7519ac458cc06"
 
 # Function to create a new subdomain locally
@@ -71,7 +71,7 @@ delete_subdomain_local() {
 # Function to create a DNS record in Cloudflare
 create_dns_record_cloudflare() {
     local subdomain="$1"
-    local record_type="CNAME"
+    local record_type="A"
     local ip_address="54.226.6.57"  # Replace with your server's IP address
 
     # Send API request to create DNS record
