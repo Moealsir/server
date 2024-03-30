@@ -25,7 +25,7 @@ server {
 
     server_name $SUBDOMAIN.$DOMAIN;
 
-    root $SUBDOMAIN_DIR;
+    root $SUBDOMAIN_DIR www.$SUBDOMAIN_DIR;
     index index.html index.htm index.nginx-debian.html;
 
     location / {
