@@ -9,7 +9,7 @@ NGINX_RELOAD="sudo systemctl reload nginx"
 # Cloudflare variables
 CLOUDFLARE_API_TOKEN="4MF3cVwzWKHFFL036xKH8zIdbGz0JR2OXlLlF_bV"
 CLOUDFLARE_ZONE_ID="db2a6826a77fbf23e7c7519ac458cc06"
-SERVER_IP="54.226.6.57"
+
 
 # Function to create a new subdomain
 create_subdomain() {
@@ -50,11 +50,12 @@ EOF
     # Reload Nginx
     $NGINX_RELOAD
 
-    # Create DNS record in Cloudflare
-    create_dns_record "$subdomain" "CNAME" "$SERVER_IP"
+    # Create DNS record in Cloudflare (CNAME record)
+    create_dns_record "$subdomain" "CNAME" "$DOMAIN"
     
     echo "Subdomain $subdomain.$DOMAIN created successfully."
 }
+
 
 # Function to delete a subdomain
 delete_subdomain() {
