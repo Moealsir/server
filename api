@@ -130,6 +130,15 @@ delete_dns_record() {
      -H "Content-Type: application/json"
 }
 
+# Function to list all DNS records in Cloudflare for the specified zone
+list_dns_records() {
+    curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/dns_records" \
+         -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+         -H "Content-Type: application/json"
+}
+
+# Call the function to list DNS records
+list_dns_records
 
 
 # Main menu function
