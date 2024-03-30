@@ -15,45 +15,46 @@ CLOUDFLARE_ZONE_ID="db2a6826a77fbf23e7c7519ac458cc06"
 
 # Function to create a new subdomain
 create_subdomain() {
-    echo "Creating a subdomain..."
-    read -p "Enter the subdomain name: " subdomain
+    echo "Creating subdomains..."
+    read -p "Enter the subdomain names separated by spaces: " subdomains
 
-    if [ -z "$subdomain" ]; then
-        echo "Subdomain name cannot be empty."
+    if [ -z "$subdomains" ]; then
+        echo "Subdomain names cannot be empty."
         exit 1
     fi
 
-    /bin/csd $subdomain
+    for subdomain in $subdomains; do
+        /bin/csd $subdomain
+
+        # Create DNS record in Cloudflare (CNAME record)
+        create_dns_record "$subdomain" "CNAME" "$DOMAIN"
+
+    done
 
     # Reload Nginx
     $NGINX_RELOAD
-
-    # Create DNS record in Cloudflare (CNAME record)
-    create_dns_record "$subdomain" "CNAME" "$DOMAIN"
-    
-    echo "Subdomain $subdomain.$DOMAIN created successfully."
 }
-
 
 # Function to delete a subdomain
 delete_subdomain() {
-    echo "Deleting a subdomain..."
-    read -p "Enter the subdomain name: " subdomain
+    echo "Deleting subdomains..."
+    read -p "Enter the subdomain names separated by spaces: " subdomains
 
-    if [ -z "$subdomain" ]; then
-        echo "Subdomain name cannot be empty."
+    if [ -z "$subdomains" ]; then
+        echo "Subdomain names cannot be empty."
         exit 1
     fi
 
-    /bin/dsd $subdomain
+    for subdomain in $subdomains; do
+        /bin/dsd $subdomain
+
+        # Delete DNS record from Cloudflare
+        delete_dns_record "$subdomain"
+
+    done
 
     # Reload Nginx
     $NGINX_RELOAD
-
-    # Delete DNS record from Cloudflare
-    delete_dns_record "$subdomain"
-
-    echo "Subdomain $subdomain.$DOMAIN deleted successfully."
 }
 
 # Function to create DNS record in Cloudflare
@@ -88,7 +89,8 @@ delete_dns_record() {
     # Delete DNS record
     curl -X DELETE "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/dns_records/$dns_record_id" \
      -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-     -H "Content-Type: application/json"
+     -H "Content-Type: application/json" \
+     > /dev/null
 }
 
 # Function to list all DNS records in Cloudflare for the specified zone
