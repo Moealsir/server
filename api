@@ -116,6 +116,7 @@ delete_dns_record() {
     echo "$dns_record_response"
 
     local dns_record_id=$(echo "$dns_record_response" | jq -r '.result[0].id')
+    echo "$dns_record_id"
 
     if [ -z "$dns_record_id" ]; then
         echo "Failed to retrieve DNS record ID. Exiting."
