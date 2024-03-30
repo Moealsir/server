@@ -7,7 +7,7 @@ NGINX_SITES_ENABLED="/etc/nginx/sites-enabled"
 NGINX_RELOAD="sudo systemctl reload nginx"
 
 # Cloudflare variables
-CLOUDFLARE_API_TOKEN="y4YPReT2-KiliGfiRhG_sgXwR0BXFh-Zqp9VoPDk"
+CLOUDFLARE_API_TOKEN="zZxAOGTf_CR_kj7YCzMmzL4Upxl4giZCJ6VnF2sQ"
 CLOUDFLARE_ZONE_ID="db2a6826a77fbf23e7c7519ac458cc06"
 SERVER_IP="54.226.6.57"
 
