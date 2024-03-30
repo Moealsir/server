@@ -65,7 +65,8 @@ create_dns_record() {
     curl -X POST "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/dns_records" \
          -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
          -H "Content-Type: application/json" \
-         --data "{\"type\":\"$record_type\",\"name\":\"$subdomain.$DOMAIN\",\"content\":\"$record_value\",\"ttl\":1,\"proxied\":$proxied}"
+         --data "{\"type\":\"$record_type\",\"name\":\"$subdomain.$DOMAIN\",\"content\":\"$record_value\",\"ttl\":1,\"proxied\":$proxied}" \
+         > /dev/null
 }
 
 # Function to delete DNS record in Cloudflare
