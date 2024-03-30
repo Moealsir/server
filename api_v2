@@ -1,7 +1,5 @@
 #!/bin/bash
 
-## creating zabat
-
 # Define variables
 DOMAIN="moealsir.tech"
 NGINX_RELOAD="sudo systemctl reload nginx"
@@ -10,23 +8,21 @@ NGINX_RELOAD="sudo systemctl reload nginx"
 CLOUDFLARE_API_TOKEN="zXE7ZmSBSZMSw7-a33RCdyAzemIIK1xKZ7A2RDin"
 CLOUDFLARE_ZONE_ID="db2a6826a77fbf23e7c7519ac458cc06"
 
-
 # Function to create a new subdomain
 create_subdomain() {
     echo "Creating subdomains..."
-    read -p "Enter the subdomain names separated by spaces: " subdomains
+    local subdomains=("$@")
 
-    if [ -z "$subdomains" ]; then
-        echo "Subdomain names cannot be empty."
+    if [ ${#subdomains[@]} -eq 0 ]; then
+        echo "No subdomains provided."
         exit 1
     fi
 
-    for subdomain in $subdomains; do
-        /bin/csd $subdomain
+    for subdomain in "${subdomains[@]}"; do
+        /bin/csd "$subdomain"
 
         # Create DNS record in Cloudflare (CNAME record)
         create_dns_record "$subdomain" "CNAME" "$DOMAIN"
-
     done
 
     # Reload Nginx
@@ -36,19 +32,18 @@ create_subdomain() {
 # Function to delete a subdomain
 delete_subdomain() {
     echo "Deleting subdomains..."
-    read -p "Enter the subdomain names separated by spaces: " subdomains
+    local subdomains=("$@")
 
-    if [ -z "$subdomains" ]; then
-        echo "Subdomain names cannot be empty."
+    if [ ${#subdomains[@]} -eq 0 ]; then
+        echo "No subdomains provided."
         exit 1
     fi
 
-    for subdomain in $subdomains; do
-        /bin/dsd $subdomain
+    for subdomain in "${subdomains[@]}"; do
+        /bin/dsd "$subdomain"
 
         # Delete DNS record from Cloudflare
         delete_dns_record "$subdomain"
-
     done
 
     # Reload Nginx
@@ -92,17 +87,6 @@ delete_dns_record() {
      > /dev/null
 }
 
-# Function to list all DNS records in Cloudflare for the specified zone
-list_dns_records() {
-    curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/dns_records" \
-         -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-         -H "Content-Type: application/json"
-}
-
-# # Call the function to list DNS records
-# list_dns_records
-
-
 # Main menu function
 main_menu() {
     echo "Main Menu:"
@@ -113,16 +97,20 @@ main_menu() {
     read -p "Please enter your choice: " choice
 
     case $choice in
-        1) create_subdomain ;;
-        2|d) delete_subdomain ;;
-        3|q) sudo systemctl restart nginx
-           exit ;;
+        1|c) shift
+           create_subdomain "$@" ;;
+        2|d) shift
+           delete_subdomain "$@" ;;
+        3|q) read -p "Are you sure you want to exit? [Y/n]: " confirm
+           case $confirm in
+               [yY]|[yY][eE][sS]) sudo systemctl restart nginx
+                                  exit ;;
+               *) main_menu ;;
+           esac ;;
         *) echo "Invalid choice. Please enter a number between 1 and 3."
            main_menu ;;
     esac
 }
 
 # Main execution
-while true; do
-    main_menu
-done
+main_menu "$@"
