@@ -1,40 +1,32 @@
 #!/bin/bash
 
-##########################################################################
-#						  	 		                                    #
-# 	create a sub domain                                              #
-#									                                       #
-#	echo "Usage: $0 <subdomain>                                         #
-#									                                    #
-##########################################################################
-
-
-
 # Define variables
 DOMAIN="moealsir.tech"
 NGINX_SITES_AVAILABLE="/etc/nginx/sites-available"
 NGINX_SITES_ENABLED="/etc/nginx/sites-enabled"
-NGINX_RELOAD="sudo systemctl reload nginx"
+NGINX_RELOAD="sudo systemctl restart nginx"
 
-# Function to create a new subdomain
-create_subdomain() {
-    if [ "$#" -ne 1 ]; then
-        echo "Usage: $0 <subdomain>"
-        exit 1
-    fi
-
+# Function to create Nginx configuration file for the subdomain
+create_nginx_config() {
     SUBDOMAIN="$1"
+    SUBDOMAIN_DIR="/var/www/$SUBDOMAIN.$DOMAIN/html"
 
-    # Create subdomain folder by copying the main domain folder
-    sudo cp -r "/var/www/$DOMAIN" "/var/www/$SUBDOMAIN.$DOMAIN"
+    # Create directory for the subdomain
+    sudo mkdir -p $SUBDOMAIN_DIR
 
-    # Create Nginx configuration file for the subdomain
-    sudo tee "/etc/nginx/sites-available/$SUBDOMAIN.$DOMAIN" > /dev/null <<EOF
+    # Create index.html for testing purposes
+    echo "<html><head><title>Welcome to $SUBDOMAIN</title></head><body><h1>Success! $SUBDOMAIN is working!</h1></body></html>" | sudo tee $SUBDOMAIN_DIR/index.html > /dev/null
+
+    # Create Nginx configuration file
+    sudo bash -c "cat > $NGINX_SITES_AVAILABLE/$SUBDOMAIN.$DOMAIN" <<EOF
 server {
     listen 80;
-    root /var/www/$SUBDOMAIN.$DOMAIN;
+    listen [::]:80;
+
+    server_name $SUBDOMAIN.$DOMAIN;
+
+    root $SUBDOMAIN_DIR;
     index index.html index.htm index.nginx-debian.html;
-    server_name $SUBDOMAIN.$DOMAIN www.$SUBDOMAIN.$DOMAIN;
 
     location / {
         try_files \$uri \$uri/ =404;
@@ -43,19 +35,32 @@ server {
 EOF
 
     # Create symbolic link to enable the site
-    sudo ln -s "/etc/nginx/sites-available/$SUBDOMAIN.$DOMAIN" "/etc/nginx/sites-enabled/$SUBDOMAIN.$DOMAIN"
+    sudo ln -s $NGINX_SITES_AVAILABLE/$SUBDOMAIN.$DOMAIN $NGINX_SITES_ENABLED/$SUBDOMAIN.$DOMAIN
+}
 
-    # Adjust permissions
-    sudo chown -R $USER:$USER "/var/www/$DOMAIN/html"
-    sudo chown -R $USER:$USER "/var/www/$SUBDOMAIN.$DOMAIN/html"
-    sudo chmod -R 755 "/var/www/$DOMAIN"
-    sudo chmod -R 755 "/var/www/$SUBDOMAIN.$DOMAIN"
+# Function to reload Nginx
+reload_nginx() {
+    $NGINX_RELOAD
+}
+
+# Main function
+main() {
+    if [ "$#" -ne 1 ]; then
+        echo "Usage: $0 <subdomain>"
+        exit 1
+    fi
+
+    SUBDOMAIN="$1"
+
+    # Create Nginx configuration
+    create_nginx_config $SUBDOMAIN
 
     # Reload Nginx
-    $NGINX_RELOAD
+    reload_nginx
 
     echo "Subdomain $SUBDOMAIN.$DOMAIN created successfully."
 }
 
-# Run the function with provided arguments
-create_subdomain "$@"
+# Run main function with provided arguments
+main "$@"
+
