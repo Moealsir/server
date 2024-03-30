@@ -14,7 +14,7 @@ CLOUDFLARE_ZONE_ID="db2a6826a77fbf23e7c7519ac458cc06"
 # Function to create a new subdomain
 create_subdomain() {
     echo "Creating subdomains..."
-    read -p "Enter the subdomain names separated by spaces: " subdomains
+    read -p "Enter the subdomains: " subdomains
 
     if [ -z "$subdomains" ]; then
         echo "Subdomain names cannot be empty."
@@ -36,7 +36,7 @@ create_subdomain() {
 # Function to delete a subdomain
 delete_subdomain() {
     echo "Deleting subdomains..."
-    read -p "Enter the subdomain names separated by spaces: " subdomains
+    read -p "Enter the subdomains: " subdomains
 
     if [ -z "$subdomains" ]; then
         echo "Subdomain names cannot be empty."
