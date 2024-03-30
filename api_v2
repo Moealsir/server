@@ -1,0 +1,109 @@
+#!/bin/bash
+
+## creating zabat
+
+# Define variables
+DOMAIN="moealsir.tech"
+NGINX_SITES_AVAILABLE="/etc/nginx/sites-available"
+NGINX_SITES_ENABLED="/etc/nginx/sites-enabled"
+NGINX_RELOAD="sudo systemctl reload nginx"
+
+# Cloudflare variables
+CLOUDFLARE_API_TOKEN="zXE7ZmSBSZMSw7-a33RCdyAzemIIK1xKZ7A2RDin"
+CLOUDFLARE_ZONE_ID="db2a6826a77fbf23e7c7519ac458cc06"
+
+# Include the function to create Nginx configuration file from the first script
+source csd
+
+# Function to create a new subdomain
+create_subdomain() {
+    echo "Creating a subdomain..."
+    read -p "Enter the subdomain name: " subdomain
+
+    if [ -z "$subdomain" ]; then
+        echo "Subdomain name cannot be empty."
+        exit 1
+    fi
+
+    # Create subdomain folder by copying the main domain folder
+    sudo cp -r "/var/www/$DOMAIN" "/var/www/$subdomain.$DOMAIN"
+
+    # Call the function to create Nginx configuration file
+    create_nginx_config "$subdomain"
+
+    # Adjust permissions
+    sudo chown -R $USER:$USER "/var/www/$DOMAIN/html"
+    sudo chown -R $USER:$USER "/var/www/$subdomain.$DOMAIN/html"
+    sudo chmod -R 755 "/var/www/$DOMAIN"
+    sudo chmod -R 755 "/var/www/$subdomain.$DOMAIN"
+
+    # Reload Nginx
+    $NGINX_RELOAD
+
+    # Create DNS record in Cloudflare (CNAME record)
+    create_dns_record "$subdomain" "CNAME" "$DOMAIN"
+    
+    echo "Subdomain $subdomain.$DOMAIN created successfully."
+}
+
+# Function to delete a subdomain
+delete_subdomain() {
+    echo "Deleting a subdomain..."
+    read -p "Enter the subdomain name: " subdomain
+
+    if [ -z "$subdomain" ]; then
+        echo "Subdomain name cannot be empty."
+        exit 1
+    fi
+
+    SUBDOMAIN_CONF="$NGINX_SITES_AVAILABLE/$subdomain.$DOMAIN"
+    SUBDOMAIN_DIR="/var/www/$subdomain.$DOMAIN"
+
+    # Remove Nginx configuration file
+    sudo rm -f "$SUBDOMAIN_CONF"
+
+    # Remove symbolic link from sites-enabled
+    sudo rm -f "$NGINX_SITES_ENABLED/$subdomain.$DOMAIN"
+
+    # Reload Nginx
+    $NGINX_RELOAD
+
+    # Remove document root directory
+    sudo rm -rf "$SUBDOMAIN_DIR"
+
+    # Delete DNS record from Cloudflare
+    delete_dns_record "$subdomain"
+
+    echo "Subdomain $subdomain.$DOMAIN deleted successfully."
+}
+
+# Function to list all DNS records in Cloudflare for the specified zone
+list_dns_records() {
+    curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/dns_records" \
+         -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+         -H "Content-Type: application/json"
+}
+
+# Main menu function
+main_menu() {
+    echo "Main Menu:"
+    echo "1. Create a subdomain"
+    echo "2. Delete a subdomain"
+    echo "3. Exit"
+
+    read -p "Please enter your choice: " choice
+
+    case $choice in
+        1) create_subdomain ;;
+        2|d) delete_subdomain ;;
+        3|q) sudo systemctl restart nginx
+           exit ;;
+        *) echo "Invalid choice. Please enter a number between 1 and 3."
+           main_menu ;;
+    esac
+}
+
+# Main execution
+while true; do
+    main_menu
+done
