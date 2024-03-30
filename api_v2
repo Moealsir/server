@@ -37,8 +37,25 @@ delete_subdomain() {
         exit 1
     fi
 
-	/bin/dsd $subdomain
+    SUBDOMAIN_CONF="$NGINX_SITES_AVAILABLE/$subdomain.$DOMAIN"
+    SUBDOMAIN_DIR="/var/www/$subdomain.$DOMAIN"
 
+    # Remove Nginx configuration file
+    sudo rm -f "$SUBDOMAIN_CONF"
+
+    # Remove symbolic link from sites-enabled
+    sudo rm -f "$NGINX_SITES_ENABLED/$subdomain.$DOMAIN"
+
+    # Reload Nginx
+    $NGINX_RELOAD
+
+    # Remove document root directory
+    sudo rm -rf "$SUBDOMAIN_DIR"
+
+    # Delete DNS record from Cloudflare
+    delete_dns_record "$subdomain"
+
+    echo "Subdomain $subdomain.$DOMAIN deleted successfully."
 }
 
 # Function to create DNS record in Cloudflare
