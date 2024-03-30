@@ -4,8 +4,6 @@
 
 # Define variables
 DOMAIN="moealsir.tech"
-NGINX_SITES_AVAILABLE="/etc/nginx/sites-available"
-NGINX_SITES_ENABLED="/etc/nginx/sites-enabled"
 NGINX_RELOAD="sudo systemctl reload nginx"
 
 # Cloudflare variables
