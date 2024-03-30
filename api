@@ -30,8 +30,7 @@ create_subdomain() {
 
     # Create DNS record in Cloudflare (CNAME record)
     create_dns_record "$subdomain" "CNAME" "$DOMAIN"
-    
-    echo "Subdomain $subdomain.$DOMAIN created successfully."
+
 }
 
 
@@ -53,7 +52,6 @@ delete_subdomain() {
     # Delete DNS record from Cloudflare
     delete_dns_record "$subdomain"
 
-    echo "Subdomain $subdomain.$DOMAIN deleted successfully."
 }
 
 # Function to create DNS record in Cloudflare
@@ -88,7 +86,8 @@ delete_dns_record() {
     # Delete DNS record
     curl -X DELETE "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/dns_records/$dns_record_id" \
      -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-     -H "Content-Type: application/json"
+     -H "Content-Type: application/json" \
+     > /dev/null
 }
 
 # Function to list all DNS records in Cloudflare for the specified zone
