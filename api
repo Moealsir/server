@@ -108,15 +108,26 @@ delete_dns_record() {
     local subdomain="$1"
 
     # Get DNS record ID
-    local dns_record_id=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/dns_records?type=A&name=$subdomain.$DOMAIN" \
+    local dns_record_response=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/dns_records?type=A&name=$subdomain.$DOMAIN" \
                            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-                           -H "Content-Type: application/json" | jq -r '.result[0].id')
+                           -H "Content-Type: application/json")
+    
+    echo "Response from API call:"
+    echo "$dns_record_response"
+
+    local dns_record_id=$(echo "$dns_record_response" | jq -r '.result[0].id')
+
+    if [ -z "$dns_record_id" ]; then
+        echo "Failed to retrieve DNS record ID. Exiting."
+        exit 1
+    fi
 
     # Delete DNS record
     curl -X DELETE "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/dns_records/$dns_record_id" \
-         -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-         -H "Content-Type: application/json"
+     -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+     -H "Content-Type: application/json"
 }
+
 
 # Main menu function
 main_menu() {
