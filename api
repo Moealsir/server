@@ -93,11 +93,12 @@ create_dns_record() {
     local subdomain="$1"
     local record_type="$2"
     local record_value="$3"
+    local proxied="true"  # Set this to "true" if the record needs to be proxied, otherwise set it to "false"
 
     curl -X POST "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/dns_records" \
          -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
          -H "Content-Type: application/json" \
-         --data "{\"type\":\"$record_type\",\"name\":\"$subdomain.$DOMAIN\",\"content\":\"$record_value\",\"ttl\":1,\"proxied\":false}"
+         --data "{\"type\":\"$record_type\",\"name\":\"$subdomain.$DOMAIN\",\"content\":\"$record_value\",\"ttl\":1,\"proxied\":$proxied}"
 }
 
 # Function to delete DNS record in Cloudflare
