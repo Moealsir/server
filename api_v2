@@ -12,8 +12,6 @@ NGINX_RELOAD="sudo systemctl reload nginx"
 CLOUDFLARE_API_TOKEN="zXE7ZmSBSZMSw7-a33RCdyAzemIIK1xKZ7A2RDin"
 CLOUDFLARE_ZONE_ID="db2a6826a77fbf23e7c7519ac458cc06"
 
-# Include the function to create Nginx configuration file from the first script
-source csd
 
 # Function to create a new subdomain
 create_subdomain() {
@@ -25,26 +23,9 @@ create_subdomain() {
         exit 1
     fi
 
-    # Create subdomain folder by copying the main domain folder
-    sudo cp -r "/var/www/$DOMAIN" "/var/www/$subdomain.$DOMAIN"
-
-    # Call the function to create Nginx configuration file
-    create_nginx_config "$subdomain"
-
-    # Adjust permissions
-    sudo chown -R $USER:$USER "/var/www/$DOMAIN/html"
-    sudo chown -R $USER:$USER "/var/www/$subdomain.$DOMAIN/html"
-    sudo chmod -R 755 "/var/www/$DOMAIN"
-    sudo chmod -R 755 "/var/www/$subdomain.$DOMAIN"
-
-    # Reload Nginx
-    $NGINX_RELOAD
-
-    # Create DNS record in Cloudflare (CNAME record)
-    create_dns_record "$subdomain" "CNAME" "$DOMAIN"
-    
-    echo "Subdomain $subdomain.$DOMAIN created successfully."
+    /bin/csd $subdomain
 }
+
 
 # Function to delete a subdomain
 delete_subdomain() {
@@ -56,25 +37,46 @@ delete_subdomain() {
         exit 1
     fi
 
-    SUBDOMAIN_CONF="$NGINX_SITES_AVAILABLE/$subdomain.$DOMAIN"
-    SUBDOMAIN_DIR="/var/www/$subdomain.$DOMAIN"
+	/bin/dsd $subdomain
 
-    # Remove Nginx configuration file
-    sudo rm -f "$SUBDOMAIN_CONF"
+}
 
-    # Remove symbolic link from sites-enabled
-    sudo rm -f "$NGINX_SITES_ENABLED/$subdomain.$DOMAIN"
+# Function to create DNS record in Cloudflare
+create_dns_record() {
+    local subdomain="$1"
+    local record_type="$2"
+    local record_value="$3"
+    local proxied="true"  # Set this to "true" if the record needs to be proxied, otherwise set it to "false"
 
-    # Reload Nginx
-    $NGINX_RELOAD
+    curl -X POST "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/dns_records" \
+         -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+         -H "Content-Type: application/json" \
+         --data "{\"type\":\"$record_type\",\"name\":\"$subdomain.$DOMAIN\",\"content\":\"$record_value\",\"ttl\":1,\"proxied\":$proxied}"
+}
 
-    # Remove document root directory
-    sudo rm -rf "$SUBDOMAIN_DIR"
+# Function to delete DNS record in Cloudflare
+delete_dns_record() {
+    local subdomain="$1"
 
-    # Delete DNS record from Cloudflare
-    delete_dns_record "$subdomain"
+    # Get DNS record ID
+    local dns_record_response=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/dns_records?type=CNAME&name=$subdomain.$DOMAIN" \
+                           -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+                           -H "Content-Type: application/json")
 
-    echo "Subdomain $subdomain.$DOMAIN deleted successfully."
+    echo "Response from API call:"
+    echo "$dns_record_response"
+
+    local dns_record_id=$(echo "$dns_record_response" | jq -r '.result[0].id')
+
+    if [ "$dns_record_id" = "null" ]; then
+        echo "DNS record not found for subdomain $subdomain.$DOMAIN. Exiting."
+        exit 1
+    fi
+
+    # Delete DNS record
+    curl -X DELETE "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/dns_records/$dns_record_id" \
+     -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+     -H "Content-Type: application/json"
 }
 
 # Function to list all DNS records in Cloudflare for the specified zone
@@ -83,6 +85,10 @@ list_dns_records() {
          -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
          -H "Content-Type: application/json"
 }
+
+# # Call the function to list DNS records
+# list_dns_records
+
 
 # Main menu function
 main_menu() {
