@@ -129,6 +129,7 @@ delete_dns_record() {
 }
 
 
+
 # Main menu function
 main_menu() {
     echo "Main Menu:"
@@ -140,8 +141,8 @@ main_menu() {
 
     case $choice in
         1) create_subdomain ;;
-        2) delete_subdomain ;;
-        3) sudo systemctl restart nginx
+        2|d) delete_subdomain ;;
+        3|q) sudo systemctl restart nginx
            exit ;;
         *) echo "Invalid choice. Please enter a number between 1 and 3."
            main_menu ;;
