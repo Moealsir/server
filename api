@@ -23,31 +23,7 @@ create_subdomain() {
         exit 1
     fi
 
-    # Create subdomain folder by copying the main domain folder
-    sudo cp -r "/var/www/$DOMAIN" "/var/www/$subdomain.$DOMAIN"
-
-    # Create Nginx configuration file for the subdomain
-    sudo tee "$NGINX_SITES_AVAILABLE/$subdomain.$DOMAIN" > /dev/null <<EOF
-server {
-    listen 80;
-    root /var/www/$subdomain.$DOMAIN;
-    index index.html index.htm index.nginx-debian.html;
-    server_name $subdomain.$DOMAIN www.$subdomain.$DOMAIN;
-
-    location / {
-        try_files \$uri \$uri/ =404;
-    }
-}
-EOF
-
-    # Create symbolic link to enable the site
-    sudo ln -s "$NGINX_SITES_AVAILABLE/$subdomain.$DOMAIN" "$NGINX_SITES_ENABLED/$subdomain.$DOMAIN"
-
-    # Adjust permissions
-    sudo chown -R $USER:$USER "/var/www/$DOMAIN/html"
-    sudo chown -R $USER:$USER "/var/www/$subdomain.$DOMAIN/html"
-    sudo chmod -R 755 "/var/www/$DOMAIN"
-    sudo chmod -R 755 "/var/www/$subdomain.$DOMAIN"
+    /bin/csd $subdomain
 
     # Reload Nginx
     $NGINX_RELOAD
@@ -69,20 +45,10 @@ delete_subdomain() {
         exit 1
     fi
 
-    SUBDOMAIN_CONF="$NGINX_SITES_AVAILABLE/$subdomain.$DOMAIN"
-    SUBDOMAIN_DIR="/var/www/$subdomain.$DOMAIN"
-
-    # Remove Nginx configuration file
-    sudo rm -f "$SUBDOMAIN_CONF"
-
-    # Remove symbolic link from sites-enabled
-    sudo rm -f "$NGINX_SITES_ENABLED/$subdomain.$DOMAIN"
+    /bin/dsd $subdomain
 
     # Reload Nginx
     $NGINX_RELOAD
-
-    # Remove document root directory
-    sudo rm -rf "$SUBDOMAIN_DIR"
 
     # Delete DNS record from Cloudflare
     delete_dns_record "$subdomain"
@@ -111,9 +77,6 @@ delete_dns_record() {
     local dns_record_response=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/dns_records?type=CNAME&name=$subdomain.$DOMAIN" \
                            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
                            -H "Content-Type: application/json")
-
-    echo "Response from API call:"
-    echo "$dns_record_response"
 
     local dns_record_id=$(echo "$dns_record_response" | jq -r '.result[0].id')
 

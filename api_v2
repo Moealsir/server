@@ -78,9 +78,6 @@ delete_dns_record() {
                            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
                            -H "Content-Type: application/json")
 
-    echo "Response from API call:"
-    echo "$dns_record_response"
-
     local dns_record_id=$(echo "$dns_record_response" | jq -r '.result[0].id')
 
     if [ "$dns_record_id" = "null" ]; then
