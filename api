@@ -111,14 +111,13 @@ delete_dns_record() {
     local dns_record_response=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/dns_records?type=A&name=$subdomain.$DOMAIN" \
                            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
                            -H "Content-Type: application/json")
-    
+
     echo "Response from API call:"
     echo "$dns_record_response"
 
     local dns_record_id=$(echo "$dns_record_response" | jq -r '.result[0].id')
-    echo "$dns_record_id"
 
-    if [ -z "$dns_record_id" ]; then
+    if [ "$dns_record_id" = "null" ]; then
         echo "Failed to retrieve DNS record ID. Exiting."
         exit 1
     fi
